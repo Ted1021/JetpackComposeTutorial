@@ -1,5 +1,8 @@
 package com.developer.ted.composetutorial.compose
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -9,11 +12,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,6 +27,8 @@ import com.developer.ted.composetutorial.R
 import com.developer.ted.composetutorial.model.Contact
 import com.developer.ted.composetutorial.ui.theme.ComposeTutorialTheme
 
+@OptIn(ExperimentalFoundationApi::class)
+@RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun ContactList(
     itemClickListener: (() -> Unit)? = null,
@@ -28,7 +36,16 @@ fun ContactList(
 ) {
     val listState = rememberLazyListState()
     LazyColumn(state = listState) {
-        items(Contact.getMockList()) { contract -> ContactItem(contract, itemClickListener, phoneClickListener) }
+        Contact.getMockList().forEach { (index, contacts) ->
+            stickyHeader { CharacterHeader(index) }
+            items(contacts) { contact ->
+                ContactItem(
+                    contact = contact,
+                    itemClickListener = itemClickListener,
+                    phoneClickListener = phoneClickListener
+                )
+            }
+        }
     }
 }
 
@@ -54,6 +71,7 @@ fun ContactItem(
             text = contact.name,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .fillMaxWidth()
@@ -72,7 +90,24 @@ fun ContactItem(
     }
 }
 
+@Composable
+fun CharacterHeader(index: String) {
+    Surface(
+        color = colorResource(id = R.color.purple_200)
+    ) {
+        Text(
+            text = index,
+            fontWeight = FontWeight.Black,
+            color = colorResource(id = R.color.purple_500),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 15.dp)
+        )
+    }
+}
 
+
+@RequiresApi(Build.VERSION_CODES.N)
 @Preview(showBackground = true)
 @Composable
 fun ContactListDemo() {
