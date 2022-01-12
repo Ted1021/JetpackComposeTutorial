@@ -1,18 +1,24 @@
 package com.developer.ted.composetutorial.compose
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.developer.ted.composetutorial.R
@@ -72,21 +78,39 @@ fun ChatContent(msg: Message) {
         )
         Spacer(modifier = Modifier.height(4.dp))
         // content
-        MessageBubble(msg.body)
+        Column {
+
+            MessageBubble(msg.body)
+        }
     }
 }
 
 @Composable
 fun MessageBubble(content: String) {
+    var isExpended by remember { mutableStateOf(false) }
+    val surfaceColor by animateColorAsState(
+        if (isExpended) MaterialTheme.colors.secondary else colorResource(id = R.color.white)
+    )
     Surface(
         shape = MaterialTheme.shapes.medium,
-        elevation = 2.dp
+        elevation = 2.dp,
+        color = surfaceColor,
+        modifier = Modifier
+            .clickable { isExpended = !isExpended }
+            .animateContentSize(
+                spring(
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            )
     ) {
         Text(
             text = content,
-            color = colorResource(R.color.black),
+            color = if (isExpended) colorResource(R.color.white) else colorResource(R.color.black),
             style = MaterialTheme.typography.body2,
-            modifier = Modifier.padding(all = 4.dp)
+            maxLines = if (isExpended) Int.MAX_VALUE else 1,
+            modifier = Modifier.padding(all = 4.dp),
+            overflow = Ellipsis
         )
     }
 }
