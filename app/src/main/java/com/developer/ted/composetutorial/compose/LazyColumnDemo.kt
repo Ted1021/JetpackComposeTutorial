@@ -2,19 +2,17 @@ package com.developer.ted.composetutorial.compose
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -26,25 +24,49 @@ import androidx.compose.ui.unit.dp
 import com.developer.ted.composetutorial.R
 import com.developer.ted.composetutorial.model.Contact
 import com.developer.ted.composetutorial.ui.theme.ComposeTutorialTheme
+import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
+
+@OptIn(ExperimentalFoundationApi::class, androidx.compose.animation.ExperimentalAnimationApi::class)
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun ContactList(
     itemClickListener: (() -> Unit)? = null,
     phoneClickListener: (() -> Unit)? = null
 ) {
-    val listState = rememberLazyListState()
-    LazyColumn(state = listState) {
-        Contact.getMockList().forEach { (index, contacts) ->
-            stickyHeader { CharacterHeader(index) }
-            items(contacts) { contact ->
-                ContactItem(
-                    contact = contact,
-                    itemClickListener = itemClickListener,
-                    phoneClickListener = phoneClickListener
-                )
+    Box {
+        val listState = rememberLazyListState()
+        LazyColumn(state = listState) {
+            Contact.getMockList().forEach { (index, contacts) ->
+                stickyHeader { CharacterHeader(index) }
+                items(contacts) { contact ->
+                    ContactItem(
+                        contact = contact,
+                        itemClickListener = itemClickListener,
+                        phoneClickListener = phoneClickListener
+                    )
+                }
             }
+        }
+
+        val showButton: Boolean by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+        val goToUp = rememberCoroutineScope()
+
+        AnimatedVisibility(
+            visible = showButton,
+            enter = fadeIn() + slideInVertically(),
+            exit = fadeOut() + slideOutVertically(),
+            modifier = Modifier
+                .padding(bottom = 30.dp)
+                .align(Alignment.BottomCenter)
+                .clickable { goToUp.launch { listState.scrollToItem(0) } }
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_arrow_up_24_24),
+                contentDescription = null,
+                modifier = Modifier.size(45.dp)
+            )
         }
     }
 }
@@ -80,11 +102,12 @@ fun ContactItem(
         )
 
         Image(
-            alignment = Alignment.CenterEnd,
+            // alignment = Alignment.CenterEnd,
             painter = painterResource(id = R.drawable.ic_phone_24),
             contentDescription = "PhoneIcon",
             modifier = Modifier
                 .padding(all = 15.dp)
+                .align(Alignment.CenterVertically)
                 .clickable { phoneClickListener?.invoke() }
         )
     }
@@ -103,6 +126,23 @@ fun CharacterHeader(index: String) {
                 .fillMaxWidth()
                 .padding(horizontal = 15.dp)
         )
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun GoToUpButton(visibility: Boolean = false) {
+    AnimatedVisibility(
+        visible = visibility,
+        enter = fadeIn() + slideInVertically(),
+        exit = fadeOut() + slideOutVertically()
+    ) {
+        Surface(color = colorResource(id = R.color.white)) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_arrow_up_24_24),
+                contentDescription = null
+            )
+        }
     }
 }
 
