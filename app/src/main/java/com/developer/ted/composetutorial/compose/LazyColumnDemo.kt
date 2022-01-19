@@ -25,6 +25,7 @@ import com.developer.ted.composetutorial.R
 import com.developer.ted.composetutorial.model.Contact
 import com.developer.ted.composetutorial.ui.theme.ComposeTutorialTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.text.font.FontFamily
 import kotlinx.coroutines.launch
 
 
@@ -32,8 +33,8 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun ContactList(
-    itemClickListener: (() -> Unit)? = null,
-    phoneClickListener: (() -> Unit)? = null
+    itemClickListener: ((String) -> Unit)? = null,
+    phoneClickListener: ((String) -> Unit)? = null
 ) {
     Box {
         val listState = rememberLazyListState()
@@ -74,12 +75,12 @@ fun ContactList(
 @Composable
 fun ContactItem(
     contact: Contact,
-    itemClickListener: (() -> Unit)? = null,
-    phoneClickListener: (() -> Unit)? = null
+    itemClickListener: ((String) -> Unit)? = null,
+    phoneClickListener: ((String) -> Unit)? = null
 ) {
     Row(modifier = Modifier
         .fillMaxWidth()
-        .clickable { itemClickListener?.invoke() }
+        .clickable { itemClickListener?.invoke(contact.name) }
     ) {
         Image(
             painter = painterResource(id = R.drawable.img_default_profile),
@@ -102,13 +103,12 @@ fun ContactItem(
         )
 
         Image(
-            // alignment = Alignment.CenterEnd,
             painter = painterResource(id = R.drawable.ic_phone_24),
             contentDescription = "PhoneIcon",
             modifier = Modifier
                 .padding(all = 15.dp)
                 .align(Alignment.CenterVertically)
-                .clickable { phoneClickListener?.invoke() }
+                .clickable { phoneClickListener?.invoke(contact.phone) }
         )
     }
 }
